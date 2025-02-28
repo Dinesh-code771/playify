@@ -25,25 +25,26 @@ export default function page() {
 function PokemonCard({ pokemon = "" }) {
   const [pokemonManagement, setPokemonManagement] = useState({
     pokemonData: null,
-    isLoading: false,
+    status: "idle",
     error: null,
   });
-  const { pokemonData, isLoading, error } = pokemonManagement;
-  console.log(pokemonData);
+  const { pokemonData, status, error } = pokemonManagement;
+
   //this is a side effect
   useEffect(() => {
     async function fetchPokemon() {
+      console.log("fetching pokemon");
       if (!pokemon) {
         setPokemonManagement({
           pokemonData: null,
-          isLoading: false,
+          status: "idle",
           error: null,
         });
         return;
       }
       // make isLoading true
       setPokemonManagement({
-        isLoading: true,
+        status: "pending",
       });
       // fetch the pokemon
       try {
@@ -54,13 +55,13 @@ function PokemonCard({ pokemon = "" }) {
         setPokemonManagement({
           ...pokemonManagement,
           pokemonData: data,
-          isLoading: false,
+          status: "success",
           error: null,
         });
       } catch (err) {
         setPokemonManagement({
           pokemonData: null,
-          isLoading: false,
+          status: "rejected",
           error: err,
         });
       }
@@ -71,23 +72,19 @@ function PokemonCard({ pokemon = "" }) {
     return () => clearTimeout(timer);
   }, [pokemon]);
 
-  if (!pokemon) {
+  if (status === "idle") {
     return (
       <div>
         <h1>write a pokemon name</h1>
       </div>
     );
-  }
-
-  if (isLoading) {
+  } else if (status === "pending") {
     return (
       <div>
         <h1>Loading...</h1>
       </div>
     );
-  }
-
-  if (error) {
+  } else if (status === "rejected") {
     return (
       <div>
         <h1>Error: {error.message}</h1>
@@ -97,21 +94,19 @@ function PokemonCard({ pokemon = "" }) {
 
   return (
     <div>
-      {pokemonData && (
-        <div className="flex mt-10 flex-col items-center justify-center border border-gray-300 rounded-md p-2 shadow-md">
-          <h1 className="text-2xl font-bold">{pokemonData.name}</h1>
-          <img
-            className="w-100 h-100 rounded-md"
-            src={pokemonData?.sprites?.front_default}
-            alt={pokemonData?.name}
-          />
-          <p className="text-sm">Height: {pokemonData?.height}</p>
-          <p className="text-sm">Weight: {pokemonData.weight}</p>
-          <p className="text-sm">
-            Base Experience: {pokemonData.base_experience}
-          </p>
-        </div>
-      )}
+      <div className="flex mt-10 flex-col items-center justify-center border border-gray-300 rounded-md p-2 shadow-md">
+        <h1 className="text-2xl font-bold">{pokemonData.name}</h1>
+        <img
+          className="w-100 h-100 rounded-md"
+          src={pokemonData?.sprites?.front_default}
+          alt={pokemonData?.name}
+        />
+        <p className="text-sm">Height: {pokemonData?.height}</p>
+        <p className="text-sm">Weight: {pokemonData.weight}</p>
+        <p className="text-sm">
+          Base Experience: {pokemonData.base_experience}
+        </p>
+      </div>
     </div>
   );
 }

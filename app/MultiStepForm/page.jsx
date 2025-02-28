@@ -8,8 +8,12 @@ export default function MultiStepForm() {
     phone: "",
   });
   const [currentStep, setCurrentStep] = useState(0);
-  function handleSubmit(inputs) {
+  function handleSubmit(inputs, e = null) {
     console.log(inputs);
+    if (e) {
+      e.currentTarget.blur();
+    }
+    // setCurrentStep(currentStep + 1);
   }
   let steps = [
     {
@@ -38,6 +42,9 @@ export default function MultiStepForm() {
         <button
           disabled={currentStep === steps.length - 1}
           onClick={() => setCurrentStep(currentStep + 1)}
+          className={`bg-blue-500 text-white p-2 rounded-md ${
+            currentStep === steps.length - 1 ? "opacity-50" : ""
+          }`}
         >
           Next
         </button>
@@ -90,21 +97,38 @@ function OTPForm({ inputNumber = 4, handleSubmit }) {
           className="w-10 h-10 border text-black border-gray-300 rounded-md text-center"
           key={index}
           type="number"
+          min={0}
+          max={9}
           value={input || ""}
           onChange={(e) => {
+            if (inputs[index]) {
+              console.log("input already filled");
+              return;
+            }
             setInputs((prev) => {
               const newInputs = [...prev];
               newInputs[index] = e.target.value;
               return newInputs;
             });
+            if (e.target.value && index === inputNumber - 1) {
+              handleSubmit(inputs, e);
+            }
             if (e.target.value && index < inputNumber - 1) {
               inputRefs.current[index + 1].focus();
             }
           }}
           onKeyDown={(e) => {
             if (e.key === "Backspace") {
+            
               if (!inputs[index]) {
                 inputRefs.current[index - 1].focus();
+              }
+              if (inputs[index]) {
+                setInputs((prev) => {
+                  const newInputs = [...prev];
+                  newInputs[index] = null;
+                  return newInputs;
+                });
               }
             }
           }}
