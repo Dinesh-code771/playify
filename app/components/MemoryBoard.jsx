@@ -84,7 +84,7 @@ export default function MemoryBoard() {
         </select>
 
       </div>
-      <div className={` grid grid-cols-${size} gap-2`}>
+      <div className={` grid grid-cols-4 gap-2`}>
         {board.map((item, index) => (
           <CardComponent
             key={index}

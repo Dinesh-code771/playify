@@ -1,6 +1,10 @@
 import React, { use } from "react";
-import { useEffect, useState, useRef } from "react";
-export default function useLocaStorageState<T>(key: string, defaultValue: T) {
+import { useEffect, useState, useRef, Dispatch, SetStateAction } from "react";
+
+export default function useLocaStorageState<T>(
+  key: string,
+  defaultValue: T
+): [T, Dispatch<SetStateAction<T>>] {
   const [value, setValue] = useState<T>(() => {
     return JSON.parse(localStorage.getItem(key) || "") || defaultValue;
   });

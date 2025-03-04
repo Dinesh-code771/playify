@@ -7,6 +7,7 @@ import React, {
   ReactNode,
   ChangeEvent,
   JSX,
+  Children,
 } from "react";
 import useFormState from "../hooks/useFormState";
 import useLocaStorageState from "../hooks/useLocaStorageState";
@@ -72,6 +73,7 @@ export default function Home(): JSX.Element {
         <Input name="password" type="password" placeholder="Password" />
       </div>
     </FormProvider>
+
     // <DemoFormComponent />
   );
 }
@@ -86,7 +88,7 @@ function FormProvider({ children }: FormProviderProps): JSX.Element {
     name: "",
     email: "",
     password: "",
-  }) as [FormData, React.Dispatch<React.SetStateAction<FormData>>];
+  });
 
   return (
     <FormContext.Provider value={{ formData, setFormData }}>
@@ -125,3 +127,138 @@ function Input({ name, type, placeholder }: InputProps): JSX.Element {
     />
   );
 }
+
+// let filesData = [
+//   {
+//     name: "dinesh",
+//     id: "1",
+//     isFolder: true,
+//     children: [
+//       {
+//         name: "reddy",
+//         id: "2",
+//         isFolder: true,
+//         children: [{ name: "reddyere", id: "3", isFolder: false }],
+//       },
+//     ],
+//   },
+//   {
+//     name: "dinesh2",
+//     id: "4",
+//     isFolder: false,
+//   },
+//   {
+//     name: "dinesh3",
+//     id: "5",
+//     isFolder: true,
+//     children: [
+//       {
+//         name: "reddy4",
+//         id: "6",
+//         isFolder: true,
+//         children: [{ name: "reddynani", id: "7", isFolder: false }],
+//       },
+//     ],
+//   },
+// ];
+
+// function List({
+//   value,
+//   addFolder,
+// }: {
+//   value: { name: string; id: string; children?: any; isFolder: boolean };
+//   addFolder: (id: string) => void;
+// }) {
+//   const [isOpen, setIsOpen] = useState({ dinesh: true });
+//   return (
+//     <>
+//       <div className="flex gap-2">
+//         <span>{value.isFolder ? "folder" : "file"}</span>
+//         <div
+//           onClick={() => {
+//             if (value.isFolder) {
+//               let cloneState = { ...isOpen };
+//               cloneState[value.name] = !cloneState[value.name];
+//               console.log(cloneState, "clone");
+//               setIsOpen(cloneState);
+//             }
+//           }}
+//         >
+//           {value.name}
+//         </div>
+//         <span
+//           onClick={() => {
+//             addFolder(value.id);
+//           }}
+//         >
+//           {!isOpen[value.name] ? "+" : "-"}
+//         </span>
+//       </div>
+//       <div className="pl-3">
+//         {isOpen[value.name]
+//           ? value.children.length > 0 &&
+//             value.children.map((val: any) => {
+//               return <List key={val.id} value={val} addFolder={addFolder} />;
+//             })
+//           : ""}
+//       </div>
+//     </>
+//   );
+// }
+
+// function FileComponent(): JSX.Element {
+//   function addFolder(id: string) {
+//     function updateList(list) {
+//       return list.map((data: any) => {
+//         if (data.id === id) {
+//           return {
+//             ...data,
+//             children: [
+//               ...data.children,
+//               { name: "newFolder", id: "53535", isFolder: true, children: [] },
+//             ],
+//           };
+//         }
+//         if (data.isFolder && data.children) {
+//           return {
+//             ...data,
+//             children: updateList(data.children), // Recursively update children
+//           };
+//         }
+//         return data;
+//       });
+//     }
+//     let newList = updateList(filesData);
+//     console.log(newList);
+//   }
+
+//   function delteFolder(id: string) {
+//     function updateList(list) {
+//       console.log(list, id);
+//       return list
+//         .filter((li) => {
+//           return li.id !== id;
+//         })
+//         .map((val) => {
+//           if (val.isFolder) {
+//             return {
+//               ...val,
+//               children: updateList(val.children),
+//             };
+//           }
+//           return val;
+//         });
+//     }
+//     let updatedListData = updateList(filesData);
+//     console.log(updatedListData);
+//   }
+//   return (
+//     <>
+//       <div>
+//         {filesData.map((value) => {
+//           return <List key={value.id} value={value} addFolder={addFolder} />;
+//         })}
+//       </div>
+//     </>
+//   );
+// }
