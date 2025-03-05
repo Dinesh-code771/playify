@@ -1,21 +1,56 @@
 "use client";
-import React, { useState, useRef, useEffect, useMemo } from "react";
-
-export default function MultiStepForm() {
-  const [details, setDetails] = useState({
+import React, { useState, useRef, useEffect, useMemo, useReducer } from "react";
+const intialState = {
+  details: {
     name: "",
     email: "",
     phone: "",
-  });
-  const [detailsError, setDetailsError] = useState({
+  },
+  detailsError: {
     nameError: "",
     emailError: "",
     phoneError: "",
-  });
-  const [currentStep, setCurrentStep] = useState(0);
-  const [otp, setOtp] = useState([]);
-  const [otpError, setOtpError] = useState("");
-  // const [isValidate, setIsValidate] = useState(false);
+  },
+  otp: [],
+  otpError: "",
+  currentStep: 0,
+};
+
+function reducer(state, action) {
+  switch (action.type) {
+    case "SET_DETAILS":
+      return {
+        ...state,
+        details: action.payload,
+      };
+
+    case "SET_DETAILS_ERROR":
+      return {
+        ...state,
+        detailsError: action.payload,
+      };
+    case "SET_OTP":
+      return {
+        ...state,
+        otp: action.payload,
+      };
+    case "SET_OTP_ERROR":
+      return {
+        ...state,
+        otpError: action.payload,
+      };
+    case "SET_CURRENT_STEP":
+      return {
+        ...state,
+        currentStep: action.payload,
+      };
+    default:
+      return state;
+  }
+}
+export default function MultiStepForm() {
+  const [state, dispatch] = useReducer(reducer, intialState);
+
   function handleSubmit(inputs, e = null) {
     if (!isValidate()) {
       return;
@@ -24,45 +59,81 @@ export default function MultiStepForm() {
       e.currentTarget.blur();
       // setCurrentStep(currentStep + 1);
     }
-    setCurrentStep(currentStep + 1);
+
+    dispatch({
+      type: "SET_CURRENT_STEP",
+      payload: state.currentStep + 1,
+    });
   }
 
   function isValidate() {
-    if (currentStep === 1) {
-      console.log(otp);
-      if (otp.join("").length === 4) {
-        setOtpError("");
+    if (state.currentStep === 1) {
+      console.log(state.otp);
+      if (state.otp.join("").length === 4) {
+        dispatch({
+          type: "SET_OTP_ERROR",
+          payload: "",
+        });
         return true;
       } else {
-        console.log(otp);
-        setOtpError("please write the otp");
+        console.log(state.otp);
+        dispatch({
+          type: "SET_OTP_ERROR",
+          payload: "please write the otp",
+        });
         return false;
       }
     }
-    if (details.name.length && details.email.length && details.phone.length) {
+    if (
+      state.details.name.length &&
+      state.details.email.length &&
+      state.details.phone.length
+    ) {
       // setIsValidate(true);
-      setDetailsError({
-        nameError: "",
-        emailError: "",
-        phoneError: "",
+      // setDetailsError({
+      //   nameError: "",
+      //   emailError: "",
+      //   phoneError: "",
+      // });
+      dispatch({
+        type: "SET_DETAILS_ERROR",
+        payload: {
+          nameError: "",
+          emailError: "",
+          phoneError: "",
+        },
       });
-    } else if (!details.name.length) {
+    } else if (!state.details.name.length) {
       // setIsValidate(false);
-      setDetailsError({
-        nameError: "please write the name",
+      console.log("name error");
+      dispatch({
+        type: "SET_DETAILS_ERROR",
+        payload: {
+          nameError: "please write the name",
+        },
       });
-    } else if (!details.email.length) {
+    } else if (!state.details.email.length) {
       // setIsValidate(false);
-      setDetailsError({
-        emailError: "please write the email",
+      dispatch({
+        type: "SET_DETAILS_ERROR",
+        payload: {
+          emailError: "please write the email",
+        },
       });
-    } else if (!details.phone.length) {
+    } else if (!state.details.phone.length) {
       // setIsValidate(false);
-      setDetailsError({
-        phoneError: "please write the phone",
+      dispatch({
+        type: "SET_DETAILS_ERROR",
+        payload: {
+          phoneError: "please write the phone",
+        },
       });
     }
-    if (details.name.length && details.email.length && details.phone.length) {
+    if (
+      state.details.name.length &&
+      state.details.email.length &&
+      state.details.phone.length
+    ) {
       return true;
     }
     return false;
@@ -72,7 +143,10 @@ export default function MultiStepForm() {
     if (!isValidate()) {
       return;
     }
-    setCurrentStep(currentStep + 1);
+    dispatch({
+      type: "SET_CURRENT_STEP",
+      payload: state.currentStep + 1,
+    });
   }
   let steps = useMemo(
     () => [
@@ -80,9 +154,11 @@ export default function MultiStepForm() {
         id: 1,
         component: (
           <Form
-            details={details}
-            setDetails={setDetails}
-            detailsError={detailsError}
+            details={state.details}
+            setDetails={(payload) => {
+              dispatch({ type: "SET_DETAILS", payload });
+            }}
+            detailsError={state.detailsError}
           />
         ),
       },
@@ -92,39 +168,47 @@ export default function MultiStepForm() {
           <OTPForm
             inputNumber={4}
             handleSubmit={handleSubmit}
-            setOtp={setOtp}
-            otpError={otpError}
+            setOtp={(payload) => {
+              dispatch({ type: "SET_OTP", payload });
+            }}
+            otpError={state.otpError}
           />
         ),
       },
       {
         id: 3,
-        component: <DetailsDisplay details={details} />,
+        component: <DetailsDisplay details={state.details} />,
       },
     ],
-    [details, otpError, detailsError, otp]
+    [state.details, state.otpError, state.detailsError, state.otp]
   );
   return (
     <div className="flex flex-col gap-4 w-full h-full justify-center items-center">
-      {steps[currentStep].component}
+      {steps[state.currentStep].component}
       <div className="flex gap-4">
         <button
-          disabled={currentStep === 0}
+          disabled={state.currentStep === 0}
           onClick={() => {
-            if (currentStep === 2) {
-              setCurrentStep(currentStep - 2);
+            if (state.currentStep === 2) {
+              dispatch({
+                type: "SET_CURRENT_STEP",
+                payload: state.currentStep - 2,
+              });
             } else {
-              setCurrentStep(currentStep - 1);
+              dispatch({
+                type: "SET_CURRENT_STEP",
+                payload: state.currentStep - 1,
+              });
             }
           }}
         >
           Previous
         </button>
         <button
-          disabled={currentStep === steps.length - 1}
+          disabled={state.currentStep === steps.length - 1}
           onClick={next}
           className={`bg-blue-500 text-white p-2 rounded-md ${
-            currentStep === steps.length - 1 ? "opacity-50" : ""
+            state.currentStep === steps.length - 1 ? "opacity-50" : ""
           }`}
         >
           Next
