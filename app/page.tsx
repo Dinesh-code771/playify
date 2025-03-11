@@ -8,6 +8,7 @@ import React, {
   ChangeEvent,
   JSX,
   Children,
+  useEffect,
 } from "react";
 import useFormState from "../hooks/useFormState";
 import useLocaStorageState from "../hooks/useLocaStorageState";
@@ -62,19 +63,109 @@ const DemoFormComponent: React.FC = () => {
   );
 };
 
-export default function Home(): JSX.Element {
+function ProgressBar({ progress }: { progress: number }): JSX.Element {
+  const [progessValue, setProgressValue] = useState(0);
+  useEffect(() => {
+    setProgressValue(progress);
+  }, []);
   return (
-    <FormProvider>
-      <div>
-        <Input name="email" type="email" placeholder="Email" />
+    <>
+      <div className="w-[700px] h-[50px] border-2 border-white overflow-hidden">
+        <div
+          style={{
+            transform: `translateX(${progessValue - 100}%)`,
+            transition: "1s ease-in",
+          }}
+          className="progress text-right font-xl align-middle text-black w-full h-full bg-green-200"
+        >
+          <span className="align-middle">{progessValue}%</span>
+        </div>
       </div>
-      <div className="flex gap-2 flex-col">
-        <Input name="name" type="text" placeholder="Name" />
-        <Input name="password" type="password" placeholder="Password" />
-      </div>
-    </FormProvider>
+    </>
+  );
+}
 
-    // <DemoFormComponent />
+const tabs = [
+  {
+    title: "Tab1",
+    id: "1",
+    component: (
+      <div>
+        <p>this is tab1</p>
+      </div>
+    ),
+  },
+  {
+    title: "Tab2",
+    id: "2",
+    component: (
+      <div>
+        <p>this is tab2</p>
+      </div>
+    ),
+  },
+  {
+    title: "Tab3",
+    id: "3",
+    component: (
+      <div>
+        <p>this is tab3</p>
+      </div>
+    ),
+  },
+];
+
+export default function Home(): JSX.Element {
+  // const [progressBarsCount, setProgressBarCount] = useState(0);
+  // return (
+  //   <div>
+  //     <button
+  //       onClick={() => {
+  //         setProgressBarCount((prev) => {
+  //           return prev + 1;
+  //         });
+  //       }}
+  //     >
+  //       Add
+  //     </button>
+  //     {new Array(progressBarsCount).fill(" ").map((_, index) => {
+  //       return <ProgressBar key={index} progress={index * 2} />;
+  //     })}
+  //   </div>
+  return (
+    <>
+      <TabsDisplay tabs={tabs} />
+    </>
+  );
+  // <DemoFormComponent />
+}
+
+function TabsDisplay({ tabs }: { tabs: any }) {
+  const [currentTab, setCurrentTab] = useState(tabs[0].id);
+
+  let tabsButtons = tabs.map((tab, index) => (
+    <button
+      className={`border p-2  text-black h-[40px] w-[100px] rounded-md ${
+        currentTab === tab.id ? "bg-green-200" : "bg-slate-50"
+      }
+  `}
+      key={index}
+      onClick={() => {
+        setCurrentTab(tab.id);
+      }}
+    >
+      {tab.title}
+    </button>
+  ));
+
+  const CurretTabPanel = tabs[currentTab - 1].component;
+  return (
+    <>
+      <div className="flex flex-col p-10 gap-10">
+        <div className="flex gap-5">{tabsButtons}</div>
+        {CurretTabPanel}
+      </div>
+    </>
   );
 }
 

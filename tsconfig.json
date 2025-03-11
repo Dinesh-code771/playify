@@ -30,7 +30,7 @@
     "**/*.tsx",
     "next-env.d.ts",
     ".next/types/**/*.ts"
-  ],
+, "hooks/useInfinite.js"  ],
   "exclude": [
     "node_modules"
   ]
