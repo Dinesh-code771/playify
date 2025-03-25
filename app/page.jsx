@@ -2,6 +2,7 @@
 import React, { useActionState } from "react";
 import useAuth from "../hooks/useAuth";
 import { useState } from "react";
+import { useOptimistic } from "react";
 //HOC
 const withAuthorization = (WrappedComponent, allowedRoles) => {
   //tewo inputs 1 : compnent 2 : allowed roles
@@ -131,7 +132,67 @@ export default function Home() {
   return (
     <div>
       {/* <UpdateUser /> */}
-      <FeedbackForm />
+      <OptimistickLike />
     </div>
+  );
+}
+
+function Link() {
+  const [likes, setLikes] = useState(100);
+  const [isLoading, setIsLoading] = useState(false);
+  async function handleLike() {
+    setIsLoading(true);
+    // optimistic update
+    setLikes((prev) => prev + 1);
+
+    try {
+      await fetch("/api/like", { method: "POST" }); //making post to server?
+      throw new Error("Failed to like");
+    } catch (error) {
+      console.log(error, "error");
+      setLikes((prev) => prev - 1); // Revert on failure
+    } finally {
+      setIsLoading(false);
+    }
+  }
+  return (
+    <button
+      className="bg-blue-500 text-white p-2 rounded-md"
+      onClick={handleLike}
+      disabled={isLoading}
+    >
+      <p className="text-white text-xl font-bold">
+        ❤️ {likes} {isLoading && "(Updating...)"}
+      </p>
+    </button>
+  );
+}
+
+function OptimistickLike() {
+  const [likes, setLikes] = useState(100);
+  const [optimisticLikes, setOptimisticLikes] = useOptimistic(
+    likes,
+    (prevLikes, newLikes) => {
+      return newLikes;
+    }
+  ); //intial state , updater function
+
+  async function handleLike() {
+    setOptimisticLikes(optimisticLikes + 1);
+    try {
+      await fetch("/api/like", { method: "POST" });
+      // setLikes((prev) => prev + 1);
+    } catch (error) {
+      setOptimisticLikes(optimisticLikes - 1);
+    }
+  }
+  return (
+    <form action={handleLike}>
+      <button
+        className="bg-blue-500 text-white p-2 rounded-md"
+      >
+        ❤️ {optimisticLikes}
+      </button>
+    </form>
   );
 }
